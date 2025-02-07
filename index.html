@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendrier avec Couleurs Aléatoires</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --base-color: #48484800;
+            --white-color: #FFFFFF;
+            --arrow-color: #00a5df; /* Couleur aléatoire appliquée */
+            --today-background-color: #007bff; /* Couleur aléatoire appliquée */
+            --event-background-color: #68bbdb;
+            --quantieme-color: #007bff;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        html {
+            font-family: "Poppins", sans-serif;
+            font-size: 14px;
+            color: var(--white-color);
+            background-color: var(--base-color);
+        }
+        body {
+            margin: 0;
+            padding: 20px;
+        }
+        .calendar {
+            width: 300px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            color: #000;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .month-year {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .arrow {
+            font-size: 2rem;
+            color: var(--arrow-color);
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.3s;
+            padding: 0 15px;
+        }
+        .arrow:hover {
+            filter: brightness(0.8);
+        }
+        .quantieme {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            font-style: italic;
+            color: var(--quantieme-color);
+        }
+        .days-of-week {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background-color: #f0f0f0;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .days-of-week div {
+            font-weight: bold;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            margin-top: 10px;
+        }
+        .calendar-grid div {
+            padding: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .today {
+            background-color: var(--today-background-color);
+            color: var(--white-color);
+            border-radius: 50%;
+        }
+        .prev-date, .next-date {
+            color: #999;
+        }
+        .has-event {
+            background-color: var(--event-background-color);
+            color: #FFFFFF;
+            font-weight: bold;
+        }
+        .current-event {
+            animation: colorPulse 3s infinite;
+        }
+        @keyframes colorPulse {
+            0% {
+                background-color: #e04f39;
+                color: #FFFFFF;
+            }
+            50% {
+                background-color: #56c271;
+                color: #000000;
+            }
+            100% {
+                background-color: #e04f39;
+                color: #FFFFFF;
+            }
+        }
+        .event-details {
+            width: 350px;
+            margin: 20px auto;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            color: #000;
+            display: none;
+        }
+        .event-details h3 {
+            font-size: 1.4rem;
+            color: var(--event-background-color);
+            margin-bottom: 10px;
+        }
+        .event-details p {
+            font-size: 1rem;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar">
+        <div class="calendar-header">
+            <span class="arrow" id="prevMonth">&#8592;</span>
+            <span class="month-year" id="monthYear"></span>
+            <span class="arrow" id="nextMonth">&#8594;</span>
+        </div>
+        <div class="quantieme" id="quantieme">Quantième du jour</div>
+        <div class="days-of-week">
+            <div>Lun</div>
+            <div>Mar</div>
+            <div>Mer</div>
+            <div>Jeu</div>
+            <div>Ven</div>
+            <div>Sam</div>
+            <div>Dim</div>
+        </div>
+        <div class="calendar-grid" id="calendarDays"></div>
+    </div>
+    <div class="event-details" id="eventDetails">
+        <p id="eventName"></p>
+        <p id="eventTime"></p>
+        <p id="eventLocation"></p>
+    </div>
+    <script>
+        const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
+                            "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+        let currentDate = new Date();
+        const events = {
+            "2025-05-20": { name: "YWCD", time: "journée entière", location: "La serre" },
+        };
+
+        // Génère une couleur aléatoire
+        // Fonction pour générer une couleur aléatoire
+function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+// Appliquer les couleurs aléatoires
+function applyRandomColors() {
+    const randomColor = getRandomColor();
+    document.documentElement.style.setProperty('--arrow-color', randomColor);
+    document.documentElement.style.setProperty('--today-background-color', randomColor);
+}
+
+// Calcul du quantième du jour
+function getDayOfYear(date) {
+    const start = new Date(date.getFullYear(), 0, 0);
+    const diff = date - start;
+    const oneDay = 1000 * 60 * 60 * 24;
+    return Math.floor(diff / oneDay);
+}
+
+// Mise à jour du calendrier
+function renderCalendar() {
+    const monthYear = document.getElementById('monthYear');
+    const calendarDays = document.getElementById('calendarDays');
+    const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+    const firstDayIndex = (firstDay.getDay() + 6) % 7;
+    const lastDayIndex = (new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDay() + 6) % 7;
+    const nextDays = 6 - lastDayIndex;
+
+    // Mise à jour du mois et de l'année
+    monthYear.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+
+    // Affichage du quantième du jour
+    const quantieme = document.getElementById('quantieme');
+    quantieme.textContent = `Quantième du jour : ${getDayOfYear(currentDate)}`;
+
+    // Réinitialisation des jours du calendrier
+    calendarDays.innerHTML = '';
+
+    // Fonction pour fermer les détails de l'événement
+    function closeEventDetails() {
+        const eventDetails = document.getElementById('eventDetails');
+        eventDetails.style.display = 'none';
+    }
+
+    // Affichage des jours précédents (partie de mois précédent)
+    for (let x = firstDayIndex; x > 0; x--) {
+        const day = document.createElement('div');
+        day.classList.add('prev-date');
+        day.textContent = new Date(currentDate.getFullYear(), currentDate.getMonth(), -x + 1).getDate();
+        calendarDays.appendChild(day);
+    }
+
+    // Affichage des jours du mois courant
+    for (let i = 1; i <= lastDay; i++) {
+        const day = document.createElement('div');
+        day.textContent = i;
+        const currentDateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+
+        // Mise en évidence du jour actuel
+        if (currentDateStr === new Date().toISOString().split('T')[0]) {
+            day.classList.add('today');
+        }
+
+        // Gestion des événements pour chaque jour
+        if (events[currentDateStr]) {
+            if (currentDateStr === new Date().toISOString().split('T')[0]) {
+                day.classList.add('current-event');
+            } else {
+                day.classList.add('has-event');
+            }
+            day.addEventListener('click', () => showEventDetails(events[currentDateStr]));
+        } else {
+            // Fermer les détails d'événements si une date sans événement est cliquée
+            day.addEventListener('click', () => closeEventDetails());
+        }
+
+        calendarDays.appendChild(day);
+    }
+
+    // Affichage des jours suivants (partie de mois suivant)
+    for (let j = 1; j <= nextDays; j++) {
+        const day = document.createElement('div');
+        day.classList.add('next-date');
+        day.textContent = j;
+        calendarDays.appendChild(day);
+    }
+}
+
+// Affichage des détails d'un événement
+function showEventDetails(event) {
+    const eventDetails = document.getElementById('eventDetails');
+    eventDetails.style.display = 'block';
+    document.getElementById('eventName').textContent = `Nom : ${event.name}`;
+    document.getElementById('eventTime').textContent = `Heure : ${event.time}`;
+    document.getElementById('eventLocation').textContent = `Lieu : ${event.location}`;
+}
+
+// Changement de mois précédent
+document.getElementById('prevMonth').addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+});
+
+// Changement de mois suivant
+document.getElementById('nextMonth').addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+});
+
+// Appliquer les couleurs aléatoires et rendre le calendrier
+applyRandomColors();
+renderCalendar();
+    </script>
+</body>
+</html>
