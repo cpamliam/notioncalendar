@@ -9,8 +9,8 @@
         :root {
             --base-color: #48484800;
             --white-color: #FFFFFF;
-            --arrow-color: #00a5df; /* Couleur aléatoire appliquée */
-            --today-background-color: #007bff; /* Couleur aléatoire appliquée */
+            --arrow-color: #06652e; /* Couleur aléatoire appliquée */
+            --today-background-color: #06652e; /* Couleur aléatoire appliquée */
             --event-background-color: #68bbdb;
             --quantieme-color: #007bff;
         }
@@ -59,12 +59,8 @@
             filter: brightness(0.8);
         }
         .quantieme {
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 1rem;
-            font-style: italic;
-            color: var(--quantieme-color);
-        }
+    display: none;
+}
         .days-of-week {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -147,7 +143,7 @@
             <span class="month-year" id="monthYear"></span>
             <span class="arrow" id="nextMonth">&#8594;</span>
         </div>
-        <div class="quantieme" id="quantieme">Quantième du jour</div>
+        <div class="quantieme" id="quantieme"></div>
         <div class="days-of-week">
             <div>Lun</div>
             <div>Mar</div>
@@ -172,25 +168,7 @@
             "2025-05-20": { name: "YWCD", time: "journée entière", location: "La serre" },
         };
 
-        // Génère une couleur aléatoire
-        // Fonction pour générer une couleur aléatoire
-function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
-
-// Appliquer les couleurs aléatoires
-function applyRandomColors() {
-    const randomColor = getRandomColor();
-    document.documentElement.style.setProperty('--arrow-color', randomColor);
-    document.documentElement.style.setProperty('--today-background-color', randomColor);
-}
-
-// Calcul du quantième du jour
+        // Calcul du quantième du jour
 function getDayOfYear(date) {
     const start = new Date(date.getFullYear(), 0, 0);
     const diff = date - start;
@@ -289,9 +267,9 @@ document.getElementById('nextMonth').addEventListener('click', () => {
     renderCalendar();
 });
 
-// Appliquer les couleurs aléatoires et rendre le calendrier
-applyRandomColors();
+// Rendre le calendrier sans appliquer de couleurs aléatoires
 renderCalendar();
+
     </script>
 </body>
 </html>
